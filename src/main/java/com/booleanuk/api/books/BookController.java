@@ -1,5 +1,9 @@
 package com.booleanuk.api.books;
 
+import com.booleanuk.api.authors.Author;
+import com.booleanuk.api.authors.AuthorRepository;
+import com.booleanuk.api.publishers.Publisher;
+import com.booleanuk.api.publishers.PublisherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +16,10 @@ import java.util.List;
 public class BookController {
     @Autowired
     private BookRepository bookRepository;
+    @Autowired
+    private PublisherRepository publisherRepository;
+    @Autowired
+    private AuthorRepository authorRepository;
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
@@ -30,7 +38,16 @@ public class BookController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public Book createBook(@RequestBody Book book) {
+        Author authorRef = this.authorRepository.findById(book.getAuthor().getId()).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found.")
+        );
+        Publisher publisherRef = this.publisherRepository.findById(book.getPublisher().getId()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publisher not found.")
+        );
+
         Book newBook = new Book(book.getTitle(), book.getGenre());
+        newBook.setAuthor(authorRef);
+        newBook.setPublisher(publisherRef);
         return this.bookRepository.save(newBook);
     }
 
@@ -41,8 +58,18 @@ public class BookController {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found")
         );
 
+        Author authorRef = this.authorRepository.findById(book.getAuthor().getId()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found.")
+        );
+
+        Publisher publisherRef = this.publisherRepository.findById(book.getPublisher().getId()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publisher not found.")
+        );
+
         bookToUpdate.setTitle(book.getTitle());
         bookToUpdate.setGenre(book.getGenre());
+        bookToUpdate.setAuthor(authorRef);
+        bookToUpdate.setPublisher(publisherRef);
         return this.bookRepository.save(bookToUpdate);
     }
 

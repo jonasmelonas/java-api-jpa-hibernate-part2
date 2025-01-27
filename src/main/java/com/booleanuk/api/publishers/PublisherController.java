@@ -1,5 +1,6 @@
 package com.booleanuk.api.publishers;
 
+import com.booleanuk.api.books.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,9 @@ import java.util.List;
 public class PublisherController {
     @Autowired
     private PublisherRepository publisherRepository;
+
+    @Autowired
+    private BookRepository bookRepository;
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
@@ -53,6 +57,7 @@ public class PublisherController {
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publisher not found.")
         );
 
+        this.bookRepository.deleteAll(publisherToDelete.getBooks());
         this.publisherRepository.delete(publisherToDelete);
         return publisherToDelete;
     }

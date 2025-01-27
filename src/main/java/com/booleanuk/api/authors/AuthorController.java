@@ -1,5 +1,7 @@
 package com.booleanuk.api.authors;
 
+import com.booleanuk.api.books.Book;
+import com.booleanuk.api.books.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,9 @@ public class AuthorController {
 
     @Autowired
     private AuthorRepository authorRepository;
+
+    @Autowired
+    private BookRepository bookRepository;
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
@@ -56,6 +61,7 @@ public class AuthorController {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found.")
         );
 
+        this.bookRepository.deleteAll(authorToDelete.getBooks());
         this.authorRepository.delete(authorToDelete);
         return authorToDelete;
     }
